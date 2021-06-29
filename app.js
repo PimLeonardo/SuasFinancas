@@ -71,11 +71,17 @@ function cadastrarDespesa() {
 	let despesas = new Despesas(dia.value, mes.value, ano.value, tipo.value, valor.value, descricao.value)
 
 	if (despesas.validarDados()) {
-		//bd.salvar(despesas)
+		bd.salvar(despesas)
 
 		document.getElementById('modal_titulo').innerHTML = 'Cadastro de despesa realizado'
 		document.getElementById('modal_mensagem').innerHTML = 'Sua despesa foi cadastrada com sucesso.'
 		$('#modalregistro').modal('show')
+		dia.value = ''
+		mes.value = ''
+		ano.value = ''
+		tipo.value = ''
+		valor.value = ''
+		descricao.value = ''
 	} else {
 		document.getElementById('modal_titulo').innerHTML = 'Erro no cadastro de despesa'
 		document.getElementById('modal_mensagem').innerHTML = 'Existem campos que não foram preenchidos de maneira correta.'
@@ -87,4 +93,28 @@ function carregarDespesas() {
 	let despesas = Array()
 
 	despesas = bd.recuperarDados()
+
+	let listaDespesa = document.getElementById('listaDespesa')
+
+	despesas.forEach(function(d){
+		let row = listaDespesa.insertRow()
+		
+		switch(d.tipo) {
+			case '1': d.tipo =  'Necessidades'
+				break
+			case '2': d.tipo =  'Saúde'
+				break
+			case '3': d.tipo =  'Educação'
+				break
+			case '4': d.tipo =  'Lazer'
+				break
+			case '5': d.tipo =  'Transporte'
+				break
+		}
+
+		row.insertCell(0).innerHTML = d.dia + '/' + d.mes + '/' + d.ano
+		row.insertCell(1).innerHTML = d.tipo
+		row.insertCell(2).innerHTML = d.descricao
+		row.insertCell(3).innerHTML = d.valor
+	})
 }
