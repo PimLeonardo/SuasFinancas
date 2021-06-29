@@ -51,16 +51,46 @@ class Bd {
 				continue
 			}
 
+			despesa.id = i
 			despesas.push(despesa)
 		}
 		return despesas
+	}
+
+	pesquisar(despesa){
+		let despesasFiltro = Array()
+
+		despesasFiltro = this.recuperarDados()
+
+		if (despesa.dia != '') {
+			despesasFiltro = despesasFiltro.filter(d => d.dia == despesa.dia)
+		}
+		if (despesa.mes != '') {
+			despesasFiltro = despesasFiltro.filter(d => d.mes == despesa.mes)
+		}
+		if (despesa.ano != '') {
+			despesasFiltro = despesasFiltro.filter(d => d.ano == despesa.ano)
+		}
+		if (despesa.tipo != '') {
+			despesasFiltro = despesasFiltro.filter(d => d.tipo == despesa.tipo)
+		}
+		if (despesa.valor != '') {
+			despesasFiltro = despesasFiltro.filter(d => d.valor == despesa.valor)
+		}
+		if (despesa.descricao != '') {
+			despesasFiltro = despesasFiltro.filter(d => d.descricao == despesa.descricao)
+		}
+		return despesasFiltro
+	}
+
+	excluir(id){
+		localStorage.removeItem(id)
 	}
 }
 
 let bd = new Bd()
 
 function cadastrarDespesa() {
-
 	let dia = document.getElementById('dia')
 	let mes = document.getElementById('mes')
 	let ano = document.getElementById('ano')
@@ -74,7 +104,7 @@ function cadastrarDespesa() {
 		bd.salvar(despesas)
 
 		document.getElementById('modal_titulo').innerHTML = 'Cadastro de despesa realizado'
-		document.getElementById('modal_mensagem').innerHTML = 'Sua despesa foi cadastrada com sucesso.'
+		document.getElementById('modal_mensagem').innerHTML = 'Sua despesa foi registrada com sucesso.'
 		$('#modalregistro').modal('show')
 		dia.value = ''
 		mes.value = ''
@@ -89,12 +119,14 @@ function cadastrarDespesa() {
 	}
 }
 
-function carregarDespesas() {
-	let despesas = Array()
-
-	despesas = bd.recuperarDados()
+function carregarDespesas(despesas = Array(), filtro = false) {
+	
+	if (despesas.length == 0 && filtro == false) {
+		despesas = bd.recuperarDados()
+	}
 
 	let listaDespesa = document.getElementById('listaDespesa')
+	listaDespesa.innerHTML = ''
 
 	despesas.forEach(function(d){
 		let row = listaDespesa.insertRow()
@@ -116,5 +148,33 @@ function carregarDespesas() {
 		row.insertCell(1).innerHTML = d.tipo
 		row.insertCell(2).innerHTML = d.descricao
 		row.insertCell(3).innerHTML = d.valor
+
+		let btn = document.createElement("button")
+		btn.innerHTML = '<i class="fas fa-times"></i>'
+		btn.className = 'btn btn-drak'
+		btn.id = 'id_despesa_' + d.id
+		btn.onclick = function() {
+			let id = this.id.replace('id_despesa_', '')
+			
+			bd.excluir(id)
+
+			window.location.reload()
+		}
+		row.insertCell(4).append(btn)
 	})
+}
+
+function pesquisar(){
+	let dia = document.getElementById('dia')
+	let mes = document.getElementById('mes')
+	let ano = document.getElementById('ano')
+	let tipo = document.getElementById('tipo')
+	let valor = document.getElementById('valor')
+	let descricao = document.getElementById('descricao')
+
+	let despesa = new Despesas(dia.value, mes.value, ano.value, tipo.value, valor.value, descricao.value)
+
+	let despesas = bd.pesquisar(despesa)
+
+	carregarDespesas(despesas, true)
 }
