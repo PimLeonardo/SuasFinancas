@@ -15,7 +15,8 @@ class Despesas {
         this[i] == "" ||
         this[i] == null ||
         this.dia > 31 ||
-        this.dia < 1
+        this.dia < 1 ||
+        this.valor < 0
       ) {
         return false;
       }
@@ -146,6 +147,10 @@ function cadastrarDespesa() {
   }
 }
 
+let entradaTotal = 0;
+let saidaTotal = 0;
+let valorTotal = 0;
+
 function carregarDespesas(despesas = Array(), filtro = false) {
   if (despesas.length == 0 && filtro == false) {
     despesas = bd.recuperarDados();
@@ -159,26 +164,22 @@ function carregarDespesas(despesas = Array(), filtro = false) {
 
     switch (d.tipo) {
       case "1":
-        d.tipo = "Necessidades";
+        d.tipo = "Entrada";
+        d.valor = parseInt(d.valor);
         break;
       case "2":
-        d.tipo = "Saúde";
-        break;
-      case "3":
-        d.tipo = "Educação";
-        break;
-      case "4":
-        d.tipo = "Lazer";
-        break;
-      case "5":
-        d.tipo = "Transporte";
+        d.tipo = "Saída";
+        d.valor = parseInt(d.valor - d.valor * 2);
         break;
     }
 
     row.insertCell(0).innerHTML = d.dia + "/" + d.mes + "/" + d.ano;
     row.insertCell(1).innerHTML = d.tipo;
     row.insertCell(2).innerHTML = d.descricao;
-    row.insertCell(3).innerHTML = d.valor;
+    row.insertCell(3).innerHTML =
+      d.valor > 0
+        ? `<i class=text-success>R$ ${d.valor}</i>`
+        : `<i class=text-danger>R$ ${d.valor}</i>`;
 
     let btn = document.createElement("button");
     btn.innerHTML = '<i class="fas fa-times"></i>';
@@ -192,6 +193,21 @@ function carregarDespesas(despesas = Array(), filtro = false) {
       window.location.reload();
     };
     row.insertCell(4).append(btn);
+
+    $("#saldo").html(() => {
+      valorTotal = valorTotal + d.valor;
+      return `R$ ${valorTotal}`;
+    });
+
+    if (d.valor > 0) {
+      entradaTotal = entradaTotal + d.valor;
+      $("#entrada").html(`R$ ${entradaTotal}`);
+    }
+
+    if (d.valor < 0) {
+      saidaTotal = saidaTotal + d.valor;
+      $("#saida").html(`R$ ${saidaTotal}`);
+    }
   });
 }
 
@@ -202,6 +218,9 @@ function pesquisar() {
   let tipo = document.getElementById("tipo");
   let valor = document.getElementById("valor");
   let descricao = document.getElementById("descricao");
+  entradaTotal = 0;
+  saidaTotal = 0;
+  valorTotal = 0;
 
   let despesa = new Despesas(
     dia.value,
@@ -215,4 +234,11 @@ function pesquisar() {
   let despesas = bd.pesquisar(despesa);
 
   carregarDespesas(despesas, true);
+
+  if (tipo.value == 1) {
+    $("#saida").html(`R$ 0`);
+  }
+  if (tipo.value == 2) {
+    $("#entrada").html(`R$ 0`);
+  }
 }
