@@ -147,14 +147,14 @@ function cadastrarDespesa() {
   }
 }
 
-let entradaTotal = 0;
-let saidaTotal = 0;
-let valorTotal = 0;
-
 function carregarDespesas(despesas = Array(), filtro = false) {
   if (despesas.length == 0 && filtro == false) {
     despesas = bd.recuperarDados();
   }
+
+  let entradaTotal = 0;
+  let saidaTotal = 0;
+  let valorTotal = 0;
 
   let listaDespesa = document.getElementById("listaDespesa");
   listaDespesa.innerHTML = "";
@@ -194,21 +194,18 @@ function carregarDespesas(despesas = Array(), filtro = false) {
     };
     row.insertCell(4).append(btn);
 
-    $("#saldo").html(() => {
-      valorTotal = valorTotal + d.valor;
-      return `R$ ${valorTotal}`;
-    });
-
     if (d.valor > 0) {
       entradaTotal = entradaTotal + d.valor;
-      $("#entrada").html(`R$ ${entradaTotal}`);
     }
-
     if (d.valor < 0) {
       saidaTotal = saidaTotal + d.valor;
-      $("#saida").html(`R$ ${saidaTotal}`);
     }
+    valorTotal = valorTotal + d.valor;
   });
+
+  $("#saida").html(`R$ ${saidaTotal}`);
+  $("#entrada").html(`R$ ${entradaTotal}`);
+  $("#saldo").html(`R$ ${valorTotal}`);
 }
 
 function pesquisar() {
@@ -218,9 +215,6 @@ function pesquisar() {
   let tipo = document.getElementById("tipo");
   let valor = document.getElementById("valor");
   let descricao = document.getElementById("descricao");
-  entradaTotal = 0;
-  saidaTotal = 0;
-  valorTotal = 0;
 
   let despesa = new Despesas(
     dia.value,
@@ -234,11 +228,4 @@ function pesquisar() {
   let despesas = bd.pesquisar(despesa);
 
   carregarDespesas(despesas, true);
-
-  if (tipo.value == 1) {
-    $("#saida").html(`R$ 0`);
-  }
-  if (tipo.value == 2) {
-    $("#entrada").html(`R$ 0`);
-  }
 }
