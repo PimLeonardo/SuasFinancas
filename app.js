@@ -116,11 +116,11 @@ function cadastrarDespesa() {
   let descricao = document.getElementById("descricao");
 
   let despesas = new Despesas(
-    dia.value,
+    parseInt(dia.value),
     mes.value,
     ano.value,
     tipo.value,
-    valor.value,
+    parseInt(valor.value),
     descricao.value
   );
 
